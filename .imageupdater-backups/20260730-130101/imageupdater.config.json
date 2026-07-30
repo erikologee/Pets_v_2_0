@@ -1,0 +1,188 @@
+{
+   "_comment": "Config for imageupdater. 'ref' is the image path exactly as it appears in your html/css today; the tool replaces that substring everywhere it is found and then rewrites 'ref' here so the next update keeps working. Sizes are recommendations only (px) - edit them freely.",
+   "imageDir": "img/CustomImage",
+   "scan": [
+      "*.html",
+      "css/*.css",
+      "styles/*.css",
+      "js/*.js"
+   ],
+   "groups": [
+      {
+         "id": "logo",
+         "label": "Logo",
+         "note": "Used in the navbar and in the footer.",
+         "width": 200,
+         "height": 70,
+         "slots": [
+            {
+               "id": "logo",
+               "label": "Logo",
+               "ref": "img/logo.png"
+            }
+         ]
+      },
+      {
+         "id": "banner",
+         "label": "Banner sliders",
+         "note": "Full screen slide backgrounds (inline background-image on .slide).",
+         "width": 1920,
+         "height": 1080,
+         "slots": [
+            {
+               "id": "slide0",
+               "label": "Slide 1",
+               "ref": "img/CustomImage/slide0-20260730-124203.jpg"
+            },
+            {
+               "id": "slide1",
+               "label": "Slide 2",
+               "ref": "img/CustomImage/slide1-20260730-125107.jpg"
+            },
+            {
+               "id": "slide2",
+               "label": "Slide 3",
+               "ref": "img/CustomImage/slide2-20260730-125111.jpg"
+            }
+         ]
+      },
+      {
+         "id": "services",
+         "label": "Services",
+         "note": "Cards in the Our Services slider.",
+         "width": 600,
+         "height": 400,
+         "slots": [
+            {
+               "id": "service1",
+               "label": "Service 1",
+               "ref": "img/CustomImage/service1-20260730-130033.jpg"
+            },
+            {
+               "id": "service2",
+               "label": "Service 2",
+               "ref": "img/CustomImage/service2-20260730-130033.jpg"
+            },
+            {
+               "id": "service3",
+               "label": "Service 3",
+               "ref": "img/CustomImage/service3-20260730-130033.jpg"
+            },
+            {
+               "id": "service4",
+               "label": "Service 4",
+               "ref": "img/CustomImage/service4-20260730-130033.jpg"
+            },
+            {
+               "id": "service5",
+               "label": "Service 5",
+               "ref": "img/CustomImage/service5-20260730-130033.jpg"
+            }
+         ]
+      },
+      {
+         "id": "about",
+         "label": "About us",
+         "note": "Illustration next to the About Us text. Transparent PNG recommended.",
+         "width": 800,
+         "height": 800,
+         "slots": [
+            {
+               "id": "about-index",
+               "label": "About us image",
+               "ref": "img/CustomImage/about-index-20260730-130045.jpg"
+            }
+         ]
+      },
+      {
+         "id": "newsletter",
+         "label": "Newsletter",
+         "note": "Background of the newsletter call-to-action (.call-to-action.bg1 in css/style.css).",
+         "width": 1920,
+         "height": 800,
+         "slots": [
+            {
+               "id": "newsletter-bg",
+               "label": "Newsletter background",
+               "ref": "img/bg1.jpg"
+            }
+         ]
+      },
+      {
+         "id": "reviews",
+         "label": "Client reviews",
+         "note": "Round profile photos - use square images.",
+         "width": 150,
+         "height": 150,
+         "slots": [
+            {
+               "id": "review1",
+               "label": "Review 1",
+               "ref": "img/review1.jpg"
+            },
+            {
+               "id": "review2",
+               "label": "Review 2",
+               "ref": "img/review2.jpg"
+            },
+            {
+               "id": "review3",
+               "label": "Review 3",
+               "ref": "img/review3.jpg"
+            },
+            {
+               "id": "review4",
+               "label": "Review 4",
+               "ref": "img/review4.jpg"
+            },
+            {
+               "id": "review5",
+               "label": "Review 5",
+               "ref": "img/review5.jpg"
+            }
+         ]
+      },
+      {
+         "id": "contact-us",
+         "label": "Contact us",
+         "note": "Image in the 'We Love Pets' callout above the contact section.",
+         "width": 1000,
+         "height": 700,
+         "slots": [
+            {
+               "id": "call1",
+               "label": "Contact us callout",
+               "ref": "img/call1.jpg"
+            }
+         ]
+      },
+      {
+         "id": "stats",
+         "label": "Stats",
+         "note": "Background of the Our Stats section (#stats in css/style.css).",
+         "width": 1920,
+         "height": 600,
+         "slots": [
+            {
+               "id": "stats-bg",
+               "label": "Stats background",
+               "ref": "img/bg2.jpg"
+            }
+         ]
+      },
+      {
+         "id": "contact-page",
+         "label": "Contact page",
+         "note": "Header background of contact.html (.page-header-contact in css/style.css).",
+         "width": 1920,
+         "height": 600,
+         "slots": [
+            {
+               "id": "contact-header",
+               "label": "Contact page header",
+               "ref": "img/bg3.jpg"
+            }
+         ]
+      }
+   ]
+}

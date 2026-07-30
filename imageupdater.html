@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta content="width=device-width, initial-scale=1" name="viewport">
+      <title>Image Updater</title>
+      <style>
+         :root {
+            --bg: #f5f4f1;
+            --card: #fff;
+            --line: #e2ded7;
+            --text: #26221e;
+            --muted: #7d766c;
+            --accent: #d4763a;
+            --ok: #2e7d52;
+            --warn: #b3491d;
+         }
+         * { box-sizing: border-box; }
+         body {
+            margin: 0;
+            padding: 24px;
+            background: var(--bg);
+            color: var(--text);
+            font: 15px/1.5 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         }
+         h1 { font-size: 22px; margin: 0 0 4px; }
+         h2 { font-size: 16px; margin: 0; }
+         .sub { color: var(--muted); font-size: 13px; }
+         header, main, #log { max-width: 1100px; margin-left: auto; margin-right: auto; }
+         header { margin-bottom: 20px; }
+         .group {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+         }
+         .group.staged { border-color: var(--accent); }
+         .group-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+         .badge {
+            background: #efe9e2;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 12px;
+            color: #6b6257;
+            white-space: nowrap;
+         }
+         .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+         .slot { border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+         .slot.drag { border-color: var(--accent); background: #fdf6f1; }
+         .slot.staged { border-color: var(--accent); }
+         .slot h3 { font-size: 14px; margin: 0 0 8px; }
+         .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+         .pane { min-width: 0; }
+         .pane-label { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+         .pane-label.new { color: var(--accent); }
+         .thumb {
+            width: 100%;
+            height: 96px;
+            background: #efeae4 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath fill='%23e4ded6' d='M0 0h8v8H0zM8 8h8v8H8z'/%3E%3C/svg%3E");
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin: 2px 0 4px;
+         }
+         .thumb img { max-width: 100%; max-height: 100%; display: block; }
+         .thumb span { color: var(--muted); font-size: 11px; text-align: center; padding: 6px; }
+         .path { font: 11px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); word-break: break-all; }
+         .used { font-size: 12px; color: var(--muted); margin-top: 6px; }
+         .used.none { color: var(--warn); }
+         .row { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+         .group-foot {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--line);
+         }
+         button {
+            font: inherit;
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+         }
+         button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+         button.small { padding: 3px 8px; font-size: 12px; }
+         button:disabled { opacity: .5; cursor: default; }
+         label.check { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+         .msg { font-size: 12px; margin-top: 6px; }
+         .msg.ok { color: var(--ok); }
+         .msg.err { color: var(--warn); }
+         .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+         #log {
+            margin-bottom: 24px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+            white-space: pre-wrap;
+            max-height: 220px;
+            overflow: auto;
+         }
+         input[type=file] { display: none; }
+      </style>
+   </head>
+   <body>
+      <header>
+         <h1>Image Updater</h1>
+         <p class="sub">
+            Pick the new images for a section, then press its <strong>Apply changes</strong> button. Selected files are
+            copied into <code id="imageDir">img/CustomImage</code> and every reference in your html/css is rewritten in
+            one go. A backup of each changed file is kept in <code>.imageupdater-backups/</code>.
+         </p>
+         <div class="toolbar">
+            <button id="reload">Refresh</button>
+            <button id="restore">Undo last change</button>
+            <span class="sub" id="scanInfo"></span>
+         </div>
+      </header>
+      <div id="log" hidden></div>
+      <main id="groups"></main>
+
+      <script>
+         const state = { groups: [], usages: {}, backups: [] };
+         const pending = new Map(); // slotId -> { file, dataUrl, width, height }
+         const resizeByGroup = new Map(); // groupId -> bool
+
+         const log = (line) => {
+            const el = document.getElementById('log');
+            el.hidden = false;
+            el.textContent += line + '\n';
+            el.scrollTop = el.scrollHeight;
+         };
+
+         async function api(url, options) {
+            const res = await fetch(url, options);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || res.statusText);
+            return data;
+         }
+
+         async function load() {
+            const data = await api('/api/state');
+            state.groups = data.groups;
+            state.usages = data.usages;
+            state.backups = data.backups;
+            document.getElementById('imageDir').textContent = data.imageDir;
+            document.getElementById('scanInfo').textContent =
+               `scanning ${data.scannedFiles.length} file(s): ${data.scannedFiles.join(', ')}`;
+            document.getElementById('restore').disabled = data.backups.length === 0;
+            render();
+         }
+
+         function render() {
+            const root = document.getElementById('groups');
+            root.textContent = '';
+            for (const group of state.groups) root.append(renderGroup(group));
+         }
+
+         function renderGroup(group) {
+            const box = document.createElement('section');
+            box.className = 'group';
+
+            const head = document.createElement('div');
+            head.className = 'group-head';
+            const title = document.createElement('h2');
+            title.textContent = group.label;
+            const size = document.createElement('span');
+            size.className = 'badge';
+            size.textContent = `${group.width} x ${group.height} px`;
+            const note = document.createElement('span');
+            note.className = 'sub';
+            note.textContent = group.note || '';
+            head.append(title, size, note);
+
+            const slots = document.createElement('div');
+            slots.className = 'slots';
+
+            const foot = document.createElement('div');
+            foot.className = 'group-foot';
+
+            const resizeLabel = document.createElement('label');
+            resizeLabel.className = 'check';
+            const resize = document.createElement('input');
+            resize.type = 'checkbox';
+            resize.checked = resizeByGroup.get(group.id) !== false;
+            resize.onchange = () => resizeByGroup.set(group.id, resize.checked);
+            resizeLabel.append(resize, document.createTextNode(`resize/crop to ${group.width}x${group.height}`));
+
+            const apply = document.createElement('button');
+            apply.className = 'primary';
+
+            const clear = document.createElement('button');
+            clear.textContent = 'Clear selection';
+
+            const status = document.createElement('span');
+            status.className = 'msg';
+
+            const refresh = () => {
+               const staged = group.slots.filter((s) => pending.has(s.id));
+               apply.textContent = staged.length ? `Apply changes (${staged.length})` : 'Apply changes';
+               apply.disabled = staged.length === 0;
+               clear.disabled = staged.length === 0;
+               box.classList.toggle('staged', staged.length > 0);
+            };
+
+            for (const slot of group.slots) slots.append(renderSlot(group, slot, refresh));
+
+            clear.onclick = () => {
+               for (const slot of group.slots) pending.delete(slot.id);
+               render();
+            };
+
+            apply.onclick = async () => {
+               const staged = group.slots.filter((s) => pending.has(s.id));
+               if (!staged.length) return;
+               apply.disabled = true;
+               clear.disabled = true;
+               status.className = 'msg';
+               status.textContent = `saving ${staged.length} image(s)...`;
+               try {
+                  const doResize = resize.checked;
+                  const updates = [];
+                  for (const slot of staged) {
+                     const entry = pending.get(slot.id);
+                     const payload = doResize
+                        ? await resizeToCover(entry, group.width, group.height)
+                        : { fileName: entry.file.name, dataBase64: entry.dataUrl.split(',')[1] };
+                     updates.push({ slotId: slot.id, ...payload });
+                  }
+                  const result = await api('/api/update', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json' },
+                     body: JSON.stringify({ updates })
+                  });
+                  for (const slot of staged) pending.delete(slot.id);
+                  log(`${group.label}: applied ${result.results.length} image(s)`);
+                  for (const r of result.results) log(`   ${r.slot}: ${r.previousRef} -> ${r.newFile}`);
+                  for (const c of result.changedFiles) log(`   updated ${c.file} (${c.count} reference(s))`);
+                  for (const w of result.warnings) log('   ! ' + w);
+                  await load();
+               } catch (err) {
+                  status.className = 'msg err';
+                  status.textContent = err.message;
+                  refresh();
+               }
+            };
+
+            foot.append(apply, clear, resizeLabel, status);
+            box.append(head, slots, foot);
+            refresh();
+            return box;
+         }
+
+         function renderSlot(group, slot, onStagedChange) {
+            const card = document.createElement('div');
+            card.className = 'slot';
+
+            const title = document.createElement('h3');
+            title.textContent = slot.label;
+
+            // Left pane: the image currently referenced in the page.
+            const current = document.createElement('div');
+            current.className = 'pane';
+            const currentLabel = document.createElement('div');
+            currentLabel.className = 'pane-label';
+            currentLabel.textContent = 'in use now';
+            const currentThumb = document.createElement('div');
+            currentThumb.className = 'thumb';
+            const currentImg = document.createElement('img');
+            currentImg.alt = slot.label;
+            currentImg.src = '/' + slot.ref + '?t=' + Date.now();
+            currentImg.onerror = () => {
+               currentThumb.textContent = '';
+               const miss = document.createElement('span');
+               miss.textContent = 'file not found: ' + slot.ref;
+               currentThumb.append(miss);
+            };
+            currentThumb.append(currentImg);
+            const currentPath = document.createElement('div');
+            currentPath.className = 'path';
+            currentPath.textContent = slot.ref;
+            current.append(currentLabel, currentThumb, currentPath);
+
+            // Right pane: the picked replacement, empty until a file is chosen.
+            const next = document.createElement('div');
+            next.className = 'pane';
+            const nextLabel = document.createElement('div');
+            nextLabel.className = 'pane-label new';
+            nextLabel.textContent = 'replacement';
+            const nextThumb = document.createElement('div');
+            nextThumb.className = 'thumb';
+            const nextPath = document.createElement('div');
+            nextPath.className = 'path';
+            next.append(nextLabel, nextThumb, nextPath);
+
+            const hits = state.usages[slot.id] || [];
+            const used = document.createElement('div');
+            used.className = 'used' + (hits.length ? '' : ' none');
+            used.textContent = hits.length
+               ? 'referenced in ' + hits.map((h) => `${h.file} (${h.count}x)`).join(', ')
+               : 'not referenced in any scanned file';
+
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/png,image/jpeg,image/gif,image/webp,image/svg+xml';
+
+            const pick = document.createElement('button');
+            pick.className = 'small';
+            pick.textContent = 'Choose image';
+            pick.onclick = () => input.click();
+
+            const drop = document.createElement('button');
+            drop.className = 'small';
+            drop.textContent = 'Remove';
+            drop.disabled = true;
+
+            const msg = document.createElement('div');
+            msg.className = 'msg';
+
+            const showPending = (entry) => {
+               nextThumb.textContent = '';
+               const img = document.createElement('img');
+               img.alt = 'replacement for ' + slot.label;
+               img.src = entry.dataUrl;
+               nextThumb.append(img);
+               nextPath.textContent = entry.file.name;
+               drop.disabled = false;
+               card.classList.add('staged');
+               const exact = entry.width === group.width && entry.height === group.height;
+               msg.className = 'msg' + (exact ? ' ok' : '');
+               msg.textContent = `${entry.width}x${entry.height}px${exact ? ' (exact match)' : ''}`;
+            };
+
+            const clearPending = () => {
+               pending.delete(slot.id);
+               nextThumb.textContent = '';
+               nextThumb.append(emptyNote());
+               nextPath.textContent = '';
+               drop.disabled = true;
+               card.classList.remove('staged');
+               msg.className = 'msg';
+               msg.textContent = '';
+               onStagedChange();
+            };
+
+            const emptyNote = () => {
+               const span = document.createElement('span');
+               span.textContent = 'nothing selected';
+               return span;
+            };
+
+            const setPending = async (file) => {
+               msg.className = 'msg';
+               msg.textContent = 'reading...';
+               try {
+                  const info = await readImage(file);
+                  const entry = { file, ...info };
+                  pending.set(slot.id, entry);
+                  showPending(entry);
+                  onStagedChange();
+               } catch (err) {
+                  msg.className = 'msg err';
+                  msg.textContent = err.message;
+               }
+            };
+
+            input.onchange = () => input.files[0] && setPending(input.files[0]);
+            drop.onclick = clearPending;
+
+            card.ondragover = (e) => { e.preventDefault(); card.classList.add('drag'); };
+            card.ondragleave = () => card.classList.remove('drag');
+            card.ondrop = (e) => {
+               e.preventDefault();
+               card.classList.remove('drag');
+               const file = e.dataTransfer.files[0];
+               if (file) setPending(file);
+            };
+
+            const pair = document.createElement('div');
+            pair.className = 'pair';
+            pair.append(current, next);
+
+            const row = document.createElement('div');
+            row.className = 'row';
+            row.append(pick, drop);
+
+            card.append(title, pair, used, row, msg, input);
+
+            // Re-selecting a file survives a re-render (e.g. after another group was applied).
+            const entry = pending.get(slot.id);
+            if (entry) showPending(entry);
+            else nextThumb.append(emptyNote());
+
+            return card;
+         }
+
+         function readImage(file) {
+            return new Promise((resolve, reject) => {
+               if (!file.type.startsWith('image/')) return reject(new Error('Not an image file.'));
+               const reader = new FileReader();
+               reader.onerror = () => reject(new Error('Could not read the file.'));
+               reader.onload = () => {
+                  const dataUrl = reader.result;
+                  const probe = new Image();
+                  probe.onload = () => resolve({ dataUrl, width: probe.naturalWidth, height: probe.naturalHeight });
+                  probe.onerror = () => resolve({ dataUrl, width: 0, height: 0 });
+                  probe.src = dataUrl;
+               };
+               reader.readAsDataURL(file);
+            });
+         }
+
+         /* Center-crop + scale to the recommended size, entirely in the browser. */
+         function resizeToCover(entry, width, height) {
+            return new Promise((resolve, reject) => {
+               if (entry.file.type === 'image/svg+xml') {
+                  resolve({ fileName: entry.file.name, dataBase64: entry.dataUrl.split(',')[1] });
+                  return;
+               }
+               const source = new Image();
+               source.onerror = () => reject(new Error('Could not decode the image for resizing.'));
+               source.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = width;
+                  canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  const scale = Math.max(width / source.naturalWidth, height / source.naturalHeight);
+                  const w = source.naturalWidth * scale;
+                  const h = source.naturalHeight * scale;
+                  const keepAlpha = entry.file.type === 'image/png' || entry.file.type === 'image/webp';
+                  if (!keepAlpha) {
+                     ctx.fillStyle = '#fff';
+                     ctx.fillRect(0, 0, width, height);
+                  }
+                  ctx.drawImage(source, (width - w) / 2, (height - h) / 2, w, h);
+                  const mime = keepAlpha ? 'image/png' : 'image/jpeg';
+                  const ext = keepAlpha ? '.png' : '.jpg';
+                  const dataUrl = canvas.toDataURL(mime, 0.9);
+                  const base = entry.file.name.replace(/\.[^.]+$/, '');
+                  resolve({ fileName: base + ext, dataBase64: dataUrl.split(',')[1] });
+               };
+               source.src = entry.dataUrl;
+            });
+         }
+
+         document.getElementById('reload').onclick = () => load().catch((e) => log('! ' + e.message));
+         document.getElementById('restore').onclick = async () => {
+            if (!state.backups.length) return;
+            const stamp = state.backups[0];
+            if (!confirm('Restore the files as they were before the last change (' + stamp + ')?')) return;
+            try {
+               const result = await api('/api/restore', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ stamp })
+               });
+               log('restored from ' + stamp + ': ' + result.restored.join(', '));
+               await load();
+            } catch (err) {
+               log('! ' + err.message);
+            }
+         };
+
+         load().catch((e) => log('! ' + e.message));
+      </script>
+   </body>
+</html>

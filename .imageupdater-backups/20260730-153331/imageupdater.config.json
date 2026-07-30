@@ -1,0 +1,277 @@
+{
+   "_comment": "Config for imageupdater. 'ref' is the image path exactly as it appears in your html/css today; the tool replaces it and then rewrites 'ref' here so the next update keeps working. 'files' limits which scanned files a slot may change; 'cssRule' limits it further to the url() inside that css rule only. Sizes are recommendations only (px) - edit them freely.",
+   "imageDir": "img/CustomImage",
+   "scan": [
+      "*.html",
+      "css/*.css",
+      "styles/*.css",
+      "js/*.js"
+   ],
+   "groups": [
+      {
+         "id": "logo",
+         "label": "Logo",
+         "note": "Used in the navbar and in the footer.",
+         "width": 200,
+         "height": 70,
+         "slots": [
+            {
+               "id": "logo",
+               "label": "Logo",
+               "ref": "img/CustomImage/logo-20260730-151223.png",
+               "files": [
+                  "*.html"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "banner",
+         "label": "Banner sliders",
+         "note": "Full screen slide backgrounds (inline background-image on each .slide).",
+         "width": 1920,
+         "height": 1080,
+         "slots": [
+            {
+               "id": "slide0",
+               "label": "Slide 1",
+               "ref": "img/CustomImage/slide0-20260730-152047.png",
+               "files": [
+                  "*.html",
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            },
+            {
+               "id": "slide1",
+               "label": "Slide 2",
+               "ref": "img/slide1.jpg",
+               "files": [
+                  "*.html",
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            },
+            {
+               "id": "slide2",
+               "label": "Slide 3",
+               "ref": "img/slide2.jpg",
+               "files": [
+                  "*.html",
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "services",
+         "label": "Services",
+         "note": "Cards in the Our Services slider.",
+         "width": 600,
+         "height": 400,
+         "slots": [
+            {
+               "id": "service1",
+               "label": "Service 1",
+               "ref": "img/CustomImage/service1-20260730-153315.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "service2",
+               "label": "Service 2",
+               "ref": "img/CustomImage/service2-20260730-151118.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "service3",
+               "label": "Service 3",
+               "ref": "img/CustomImage/service3-20260730-151118.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "service4",
+               "label": "Service 4",
+               "ref": "img/CustomImage/service4-20260730-151118.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "service5",
+               "label": "Service 5",
+               "ref": "img/CustomImage/service5-20260730-151118.jpg",
+               "files": [
+                  "*.html"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "about",
+         "label": "About us",
+         "note": "Illustration next to the About Us text. Transparent PNG recommended.",
+         "width": 800,
+         "height": 800,
+         "slots": [
+            {
+               "id": "about-index",
+               "label": "About us image",
+               "ref": "img/CustomImage/about-index-20260730-145439.jpg",
+               "files": [
+                  "*.html"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "newsletter",
+         "label": "Newsletter",
+         "note": "Fixed background of the newsletter call-to-action (the .bg1 rule in css/style.css).",
+         "width": 1920,
+         "height": 800,
+         "slots": [
+            {
+               "id": "newsletter-bg",
+               "label": "Newsletter background",
+               "ref": "img/CustomImage/newsletter-bg-20260730-145450.jpg",
+               "cssRule": ".bg1",
+               "files": [
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "reviews",
+         "label": "Client reviews",
+         "note": "Round profile photos - use square images.",
+         "width": 150,
+         "height": 150,
+         "slots": [
+            {
+               "id": "review1",
+               "label": "Review 1",
+               "ref": "img/CustomImage/review1-20260730-145511.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "review2",
+               "label": "Review 2",
+               "ref": "img/CustomImage/review2-20260730-145511.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "review3",
+               "label": "Review 3",
+               "ref": "img/CustomImage/review3-20260730-145511.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "review4",
+               "label": "Review 4",
+               "ref": "img/CustomImage/review4-20260730-145511.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "review5",
+               "label": "Review 5",
+               "ref": "img/CustomImage/review5-20260730-145511.jpg",
+               "files": [
+                  "*.html"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "contact-us",
+         "label": "Contact us",
+         "note": "The 'We Love Pets' callout photo plus the fixed background of the #contact-index section.",
+         "width": 1000,
+         "height": 700,
+         "slots": [
+            {
+               "id": "call1",
+               "label": "We Love Pets callout",
+               "ref": "img/CustomImage/call1-20260730-145704.jpg",
+               "files": [
+                  "*.html"
+               ]
+            },
+            {
+               "id": "contact-index-bg",
+               "label": "Contact section background",
+               "ref": "img/CustomImage/contact-index-bg-20260730-145924.jpg",
+               "cssRule": "#contact-index",
+               "files": [
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "stats",
+         "label": "Stats",
+         "note": "Middle layer of the animated #stats background (the two falling-bones layers in the same rule are left alone). Transparent PNG.",
+         "width": 1920,
+         "height": 600,
+         "slots": [
+            {
+               "id": "stats-bg",
+               "label": "Stats background",
+               "ref": "img/CustomImage/stats-bg-20260730-145913.jpg",
+               "cssRule": "#stats",
+               "files": [
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            }
+         ]
+      },
+      {
+         "id": "contact-page",
+         "label": "Contact page",
+         "note": "Parallax header of the contact page and the illustration behind its form.",
+         "width": 1920,
+         "height": 600,
+         "slots": [
+            {
+               "id": "contact-header",
+               "label": "Parallax header",
+               "ref": "img/CustomImage/contact-header-20260730-153256.jpg",
+               "cssRule": ".parallax-header",
+               "files": [
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            },
+            {
+               "id": "contact-page-bg",
+               "label": "Contact page illustration",
+               "ref": "img/CustomImage/contact-page-bg-20260730-145851.jpg",
+               "cssRule": "#contact-index2",
+               "files": [
+                  "css/*.css",
+                  "styles/*.css"
+               ]
+            }
+         ]
+      }
+   ]
+}

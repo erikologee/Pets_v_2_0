@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Text Updater</title>
+      <style>
+         :root {
+            --bg: #f7f6f1;
+            --card: #ffffff;
+            --border: #dad4c9;
+            --text: #1f1c19;
+            --muted: #6e665c;
+            --primary: #0f63b4;
+            --success: #256029;
+            --warn: #a94625;
+         }
+         * { box-sizing: border-box; }
+         body { margin: 0; font: 15px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+         header, main { max-width: 1120px; margin: 0 auto; padding: 24px; }
+         header h1 { margin: 0 0 6px; font-size: 24px; }
+         header p { margin: 8px 0 0; color: var(--muted); }
+         .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+         .toolbar button { border: 1px solid var(--border); background: #fff; color: var(--text); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+         .toolbar button.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+         .group { background: var(--card); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 18px; overflow: hidden; }
+         .group-head { padding: 18px 24px; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+         .group-head h2 { margin: 0; font-size: 18px; }
+         .group-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+         .group-body { padding: 0 24px 24px; display: grid; gap: 16px; }
+         label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--muted); }
+         input, textarea { width: 100%; font: inherit; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; color: var(--text); background: #fff; }
+         textarea { min-height: 120px; resize: vertical; }
+         .field-row { display: grid; gap: 16px; }
+         .field-row.wide { grid-template-columns: 1fr 1fr; }
+         .field-row.wide label { margin-bottom: 6px; }
+         .current-html { white-space: pre-wrap; background: #f3f1eb; border: 1px solid var(--border); border-radius: 10px; padding: 14px; color: var(--muted); font-size: 13px; }
+         .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+         .actions button { border: 1px solid var(--border); background: #fff; padding: 10px 16px; border-radius: 10px; cursor: pointer; }
+         .actions button.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+         .message { color: var(--muted); font-size: 13px; }
+         .message.success { color: var(--success); }
+         .message.error { color: var(--warn); }
+      </style>
+   </head>
+   <body>
+      <header>
+         <h1>Text Updater</h1>
+         <p>Edit the main index page text sections and apply changes directly to <code>index.html</code>.</p>
+         <div class="toolbar">
+            <button id="refresh">Refresh</button>
+            <span id="status"></span>
+         </div>
+      </header>
+      <main id="groups"></main>
+      <script>
+         const slots = [];
+         const statusEl = document.getElementById('status');
+
+         const api = async (path, options) => {
+            const res = await fetch(path, options);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || res.statusText);
+            return data;
+         };
+
+         const loadState = async () => {
+            const data = await api('/api/state');
+            document.getElementById('groups').innerHTML = '';
+            data.slots.forEach(slot => renderSlot(slot));
+         };
+
+         const renderSlot = (slot) => {
+            const group = document.createElement('section');
+            group.className = 'group';
+            group.innerHTML = `
+               <div class="group-head">
+                  <div>
+                     <h2>${slot.label}</h2>
+                     <p>${slot.description}</p>
+                  </div>
+                  <div class="message" id="msg-${slot.id}"></div>
+               </div>
+               <div class="group-body">
+                  <div class="field-row wide">
+                     <label for="title-${slot.id}">Heading</label>
+                     <input type="text" id="title-${slot.id}" value="${escapeHtml(slot.title)}" />
+                  </div>
+                  <div class="field-row">
+                     <label for="subtitle-${slot.id}">Subheading / first paragraph</label>
+                     <textarea id="subtitle-${slot.id}">${escapeHtml(slot.subtitle)}</textarea>
+                  </div>
+                  <div class="field-row">
+                     <label for="body-${slot.id}">Paragraph / second paragraph</label>
+                     <textarea id="body-${slot.id}">${escapeHtml(slot.body)}</textarea>
+                  </div>
+                  <div>
+                     <label>Current section HTML</label>
+                     <div class="current-html">${escapeHtml(slot.currentHtml)}</div>
+                  </div>
+                  <div class="actions">
+                     <button class="primary" id="update-${slot.id}">Update text</button>
+                     <button id="reset-${slot.id}">Reset fields</button>
+                  </div>
+               </div>
+            `;
+
+            document.getElementById('groups').appendChild(group);
+            document.getElementById(`update-${slot.id}`).addEventListener('click', () => updateSlot(slot.id));
+            document.getElementById(`reset-${slot.id}`).addEventListener('click', () => {
+               document.getElementById(`title-${slot.id}`).value = slot.title;
+               document.getElementById(`subtitle-${slot.id}`).value = slot.subtitle;
+               document.getElementById(`body-${slot.id}`).value = slot.body;
+               setMessage(slot.id, 'Fields reset.', '');
+            });
+         };
+
+         const escapeHtml = (text) => {
+            return text
+               .replace(/&/g, '&amp;')
+               .replace(/</g, '&lt;')
+               .replace(/>/g, '&gt;')
+               .replace(/"/g, '&quot;')
+               .replace(/'/g, '&#39;');
+         };
+
+         const setMessage = (slotId, text, type) => {
+            const el = document.getElementById(`msg-${slotId}`);
+            if (!el) return;
+            el.textContent = text;
+            el.className = type ? `message ${type}` : 'message';
+         };
+
+         const updateSlot = async (slotId) => {
+            const title = document.getElementById(`title-${slotId}`).value;
+            const subtitle = document.getElementById(`subtitle-${slotId}`).value;
+            const body = document.getElementById(`body-${slotId}`).value;
+            setMessage(slotId, 'Saving…', '');
+            try {
+               const result = await api('/api/update', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ slotId, title, subtitle, body })
+               });
+               setMessage(slotId, result.message, result.changed ? 'success' : '');
+               await loadState();
+            } catch (err) {
+               setMessage(slotId, err.message, 'error');
+            }
+         };
+
+         document.getElementById('refresh').addEventListener('click', async () => {
+            statusEl.textContent = 'Reloading…';
+            try {
+               await loadState();
+               statusEl.textContent = 'Refreshed.';
+            } catch (err) {
+               statusEl.textContent = `Error: ${err.message}`;
+            }
+            setTimeout(() => (statusEl.textContent = ''), 3000);
+         });
+
+         loadState().catch(err => {
+            statusEl.textContent = `Failed to load: ${err.message}`;
+         });
+      </script>
+   </body>
+</html>
