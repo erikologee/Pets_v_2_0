@@ -2,7 +2,8 @@
 
 backend:
   name: github
-  repo: user/repo
+  repo: erikologee/Pets_v_2_0
+  branch: main
 
 media_folder: /public/media
 public_folder: /media
