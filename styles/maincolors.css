@@ -37,7 +37,7 @@ Main Color Scheme
 .gallery-thumb .overlay-mask,
 .slick-arrow:hover,
 .slide__overlay {
-    background-color: #108896;
+    background-color: #03658C;
 }
 
 .media-heading small,
@@ -51,7 +51,7 @@ h2,
 .social-media a i:hover,
 .team-wrap .member .wrap .info .position li:before,
 ul.custom li {
-    color: #108896;
+    color: #03658C;
 }
 
 .service,
@@ -71,12 +71,12 @@ ul.custom li {
 .table>tfoot>tr>th,
 .table>thead>tr>td,
 .table>thead>tr>th {
-    border-color: #108896;
+    border-color: #03658C;
 }
 
 .box_icon > .icon:hover > .image,
 .review .review-profile-image img {
-    outline-color: #108896;
+    outline-color: #03658C;
 }
 
 /*________  Orange ________  */
@@ -101,7 +101,7 @@ blockquote:before,
 .numscroller,
 .bounce1:after,
 .img-box ul i:hover {
-    color: #EF5030;
+    color: #F26A4B;
 }
 
 a.list-group-item:focus,
@@ -134,7 +134,7 @@ button.list-group-item:hover,
 .accordion-button:hover,
 .navbar-custom li a:hover,
 .navbar-custom li a.active  {
-    background-color: #EF5030;
+    background-color: #F26A4B;
 }
 
 .elements h5,
@@ -142,12 +142,12 @@ button.list-group-item:hover,
 .open>.dropdown-toggle.btn-default:hover,
 .form-control:focus,
 .features i {
-    border-color: #EF5030;
+    border-color: #F26A4B;
 }
-/*________  Yellow  ________  */
+/*________  Blue accent  ________  */
 
 .btn {
-    box-shadow: inset 9px 0px 0px 0px #F19F1F;
+    box-shadow: inset 9px 0px 0px 0px #03738C;
 }
 
 .navbar,
@@ -155,17 +155,17 @@ button.list-group-item:hover,
 .section-heading h2:before,
 .section-heading h2:after,
 .slick-arrow,.slick-arrow:focus,.bg-darkcolor .btn:hover {
-    background-color: #F19F1F;
+    background-color: #027368;
 }
 
 .form-control,
 .price-table .featured,
 #map-canvas {
-    border-color: #F19F1F;
+    border-color: #03738C;
 }
 
 .date-category i {
-    color: #F19F1F;
+    color: #027368;
 }
 /*________  Secondary gray  ________  */
 
@@ -173,7 +173,7 @@ button.list-group-item:hover,
 .review .review-profile-image img,
 .jumbotron,
 #elements h5.sub-header {
-    border-color: #F5F3EE;
+    border-color: #BACDD9;
 }
 
 .label-default,
@@ -190,16 +190,16 @@ blockquote,
 .tab-content,
 .nav.nav-tabs > li > a.active:focus,.nav.nav-tabs>li>a.active,
 .team-wrap .member {
-    background-color: #F5F3EE;
+    background-color: #BACDD9;
 }
 
 .rounded-circle,
 .blog-post,
 .sidebar,
 .accordion-group {
-    border-color: #F5F3EE;
+    border-color: #BACDD9;
 }
-/*________  Secondary Yellow  ________  */
+/*________  Secondary teal  ________  */
 
 .form-control,
 .price-table .plan,
@@ -207,10 +207,10 @@ blockquote,
 .bg-lightcolor2,
 #elements h5.sub-header,
 .table-hover>tbody>tr:hover {
-    background: #ffefd5;
+    background: #DCEAF0;
 }
 
 .adoption-thumb img,
 .adoption-thumb:hover img {
-    border-color: #ffefd5;
+    border-color: #DCEAF0;
 }
